@@ -1,0 +1,95 @@
+# Setting Up Kafka on an EC2 Instance
+
+This guide provides step-by-step instructions for setting up and running Kafka on an Amazon EC2 instance.
+
+## 1. Download and Extract Kafka
+
+```bash
+wget kafka{binary}
+tar -xvf kafka{binary}
+```
+
+## 2. Install Java
+
+Check if Java is installed:
+
+```bash
+java -version
+```
+
+If Java is not installed, install OpenJDK 1.8.0:
+
+```bash
+sudo yum install java-1.8.0-openjdk
+```
+
+Verify the Java installation:
+
+```bash
+java -version
+```
+
+## 3. Navigate to Kafka Directory
+
+```bash
+cd kafka_2.12-3.3.1
+```
+
+## Starting Zookeeper and Kafka Servers
+
+### 4. Start Zookeeper
+
+```bash
+bin/zookeeper-server-start.sh config/zookeeper.properties
+```
+
+### 5. Start Kafka Server
+
+Open a new terminal session, SSH into your EC2 instance, and set Kafka heap options:
+
+```bash
+export KAFKA_HEAP_OPTS="-Xmx256M -Xms128M"
+cd kafka_2.12-3.3.1
+bin/kafka-server-start.sh config/server.properties
+```
+
+**Note:** The Kafka server will be pointing to a private IP by default. To make it accessible via the public IP, you need to modify the `server.properties` file.
+
+## 6. Update `server.properties` for Public Access
+
+Edit the `server.properties` file:
+
+```bash
+sudo nano config/server.properties
+```
+
+Change the `ADVERTISED_LISTENERS` property to the public IP of your EC2 instance.
+
+## Working with Kafka Topics
+
+### 7. Create a Topic
+
+Open a new terminal session, SSH into your EC2 instance, and run the following command to create a new topic:
+
+```bash
+cd kafka_2.12-3.3.1
+bin/kafka-topics.sh --create --topic demo_testing2 --bootstrap-server {Public_IP_of_EC2_Instance:9092} --replication-factor 1 --partitions 1
+```
+
+## Producing and Consuming Messages
+
+### 8. Start Kafka Producer
+
+```bash
+bin/kafka-console-producer.sh --topic demo_testing2 --bootstrap-server {Public_IP_of_EC2_Instance:9092}
+```
+
+### 9. Start Kafka Consumer
+
+Open a new terminal session, SSH into your EC2 instance, and run the following command:
+
+```bash
+cd kafka_2.12-3.3.1
+bin/kafka-console-consumer.sh --topic demo_testing2 --bootstrap-server {Public_IP_of_EC2_Instance:9092}
+```
+
